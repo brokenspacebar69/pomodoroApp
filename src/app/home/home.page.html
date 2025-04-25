@@ -1,17 +1,20 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Pomodoro Timer</ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>Pomodoro App</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div class="center-content">
-    <h2>{{ currentTime }}</h2>
-    <h1>{{ timerLabel }}</h1>
-    <h3 *ngIf="timerRunning">{{ timer | date:'mm:ss':'UTC' }}</h3>
+  <h2>🕒 Current Time: {{ currentTime }}</h2>
 
-    <ion-button expand="block" color="primary" (click)="startPomodoroCycle()" [disabled]="timerRunning">
+  <div *ngIf="!sessionRunning">
+    <ion-button expand="block" color="success" (click)="startPomodoro()">
       Start Pomodoro Cycle
     </ion-button>
+  </div>
+
+  <div *ngIf="sessionRunning">
+    <h3>{{ onBreak ? 'Break Time ⏸️' : 'Work Time 💼' }}</h3>
+    <h1 style="font-size: 3rem;">{{ displayCountdown }}</h1>
   </div>
 </ion-content>

@@ -1,77 +1,91 @@
-import { Component, OnInit } from '@angular/core';
-import { LocalNotifications } from '@capacitor/local-notifications';
-import { IonicModule } from '@ionic/angular';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IonicModule, ToastController, Platform } from '@ionic/angular';
+import { formatDate } from '@angular/common';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
-  imports: [IonicModule, CommonModule] // add other needed imports
+  templateUrl: './home.page.html',
+  styleUrls: ['./home.page.scss'],
+  imports: [IonicModule, CommonModule]
 })
-
-export class HomePage implements OnInit {
+export class HomePage {
   currentTime: string = '';
-  timer: number = 0;
   interval: any;
-  timerRunning: boolean = false;
-  timerLabel: string = 'Pomodoro';
-  
+  countdown: number = 0;
+  displayCountdown: string = '';
+  sessionRunning = false;
+  onBreak = false;
+
+  constructor(private toastCtrl: ToastController, private platform: Platform) {}
+
   ngOnInit() {
     this.updateClock();
     setInterval(() => this.updateClock(), 1000);
-    LocalNotifications.requestPermissions();
   }
 
   updateClock() {
-    const now = new Date();
-    this.currentTime = now.toLocaleTimeString();
+    this.currentTime = formatDate(new Date(), 'HH:mm:ss', 'en-US');
   }
 
-  startPomodoroCycle() {
-    if (this.timerRunning) return;
+  startPomodoro() {
+    if (this.sessionRunning) return;
 
-    this.timerLabel = 'Work';
-    this.startCountdown(25 * 60, async () => {
-      await this.notifyUser('Pomodoro Finished!', 'Time for a break ☕');
-      this.timerLabel = 'Break';
-      this.startCountdown(5 * 60, async () => {
-        await this.notifyUser('Break Ended!', 'Back to work! 💼');
-        this.resetCycle();
-      });
+    this.sessionRunning = true;
+    this.countdown = 25 * 60; // 25 mins
+    this.startCountdown(() => {
+      this.showNotification('Work session done! Time for a break 🎉');
+      this.startBreak();
     });
   }
 
-  startCountdown(seconds: number, onComplete: () => void) {
-    this.timer = seconds;
-    this.timerRunning = true;
+  startBreak() {
+    this.onBreak = true;
+    this.countdown = 5 * 60; // 5 mins
+    this.startCountdown(() => {
+      this.showNotification('Break finished! Back to work ☕');
+      this.resetCycle();
+    });
+  }
 
+  startCountdown(callback: Function) {
     this.interval = setInterval(() => {
-      this.timer--;
-      if (this.timer <= 0) {
+      this.countdown--;
+      this.displayCountdown = this.formatTime(this.countdown);
+
+      if (this.countdown <= 0) {
         clearInterval(this.interval);
-        this.timerRunning = false;
-        onComplete();
+        callback();
+        this.vibratePhone();
       }
     }, 1000);
   }
 
   resetCycle() {
-    this.timer = 0;
-    this.timerLabel = 'Pomodoro';
-    this.timerRunning = false;
+    this.sessionRunning = false;
+    this.onBreak = false;
+    this.displayCountdown = '';
   }
 
-  async notifyUser(title: string, body: string) {
-    await LocalNotifications.schedule({
-      notifications: [{
-        title,
-        body,
-        id: new Date().getTime(),
-        sound: 'beep.wav',
-        smallIcon: 'ic_stat_icon_config_sample',
-      }]
+  formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  async showNotification(message: string) {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      position: 'top'
     });
+    await toast.present();
+  }
+
+  vibratePhone() {
+    if (this.platform.is('capacitor') && navigator.vibrate) {
+      navigator.vibrate(1000);
+    }
   }
 }
