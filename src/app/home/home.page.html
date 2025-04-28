@@ -1,20 +1,29 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Pomodoro App</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="ion-padding" [fullscreen]="true">
+  <div class="container">
+    <h1 class="title">Pomodoro Timer</h1>
 
-<ion-content class="ion-padding">
-  <h2>🕒 Current Time: {{ currentTime }}</h2>
+    <div class="timer-circle">
+      <h1 class="timer">{{ sessionRunning ? displayCountdown : '25:00' }}</h1>
+    </div>
 
-  <div *ngIf="!sessionRunning">
-    <ion-button expand="block" color="success" (click)="startPomodoro()">
-      Start Pomodoro Cycle
-    </ion-button>
-  </div>
+    <h3 class="session-text">
+      {{ sessionRunning ? (onBreak ? 'Break Time ☕' : 'Focus Time 💻') : 'Ready to Start!' }}
+    </h3>
 
-  <div *ngIf="sessionRunning">
-    <h3>{{ onBreak ? 'Break Time ⏸️' : 'Work Time 💼' }}</h3>
-    <h1 style="font-size: 3rem;">{{ displayCountdown }}</h1>
+    <div class="button-wrapper">
+      <ion-button 
+        expand="block" 
+        size="large" 
+        shape="round"
+        (click)="startPomodoro()"
+        [disabled]="sessionRunning"
+      >
+        Start Pomodoro Cycle
+      </ion-button>
+    </div>
+
+    <div class="clock">
+      <h2>{{ currentTime }}</h2>
+    </div>
   </div>
 </ion-content>

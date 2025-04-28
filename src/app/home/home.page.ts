@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ToastController, Platform } from '@ionic/angular';
 import { formatDate } from '@angular/common';
+import { App } from '@capacitor/app';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 @Component({
   standalone: true,
@@ -17,12 +19,17 @@ export class HomePage {
   displayCountdown: string = '';
   sessionRunning = false;
   onBreak = false;
+  
 
   constructor(private toastCtrl: ToastController, private platform: Platform) {}
 
   ngOnInit() {
     this.updateClock();
     setInterval(() => this.updateClock(), 1000);
+
+    this.platform.backButton.subscribeWithPriority(10, () => {
+      App.exitApp();
+    });
   }
 
   updateClock() {
@@ -33,18 +40,18 @@ export class HomePage {
     if (this.sessionRunning) return;
 
     this.sessionRunning = true;
-    this.countdown = 25 * 60; // 25 mins
+    this.countdown = 25 * 60; // 25 minutes
     this.startCountdown(() => {
-      this.showNotification('Work session done! Time for a break 🎉');
+      this.sendNotification('Work session done! Time for a break 🎉');
       this.startBreak();
     });
   }
 
   startBreak() {
     this.onBreak = true;
-    this.countdown = 5 * 60; // 5 mins
+    this.countdown = 5 * 60; // 5 minutes
     this.startCountdown(() => {
-      this.showNotification('Break finished! Back to work ☕');
+      this.sendNotification('Break finished! Ready for another Pomodoro 🍅');
       this.resetCycle();
     });
   }
@@ -56,8 +63,8 @@ export class HomePage {
 
       if (this.countdown <= 0) {
         clearInterval(this.interval);
-        callback();
         this.vibratePhone();
+        callback();
       }
     }, 1000);
   }
@@ -69,23 +76,38 @@ export class HomePage {
   }
 
   formatTime(seconds: number): string {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
+    const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const sec = (seconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${sec}`;
   }
 
-  async showNotification(message: string) {
+  async sendNotification(message: string) {
+    await LocalNotifications.requestPermissions(); // ask permission
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          title: 'Pomodoro Timer',
+          body: message,
+          id: new Date().getTime(),
+          schedule: { at: new Date(Date.now()) },
+          sound: 'beep.wav', // optional: customize with your own sound
+          smallIcon: 'ic_launcher',
+        }
+      ]
+    });
+
     const toast = await this.toastCtrl.create({
-      message,
+      message: message,
       duration: 2000,
-      position: 'top'
+      position: 'top',
+      color: 'primary'
     });
     await toast.present();
   }
 
   vibratePhone() {
-    if (this.platform.is('capacitor') && navigator.vibrate) {
-      navigator.vibrate(1000);
+    if (navigator.vibrate) {
+      navigator.vibrate([300, 100, 300]);
     }
   }
 }
