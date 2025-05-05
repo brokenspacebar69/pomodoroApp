@@ -40,7 +40,7 @@ export class HomePage {
     if (this.sessionRunning) return;
 
     this.sessionRunning = true;
-    this.countdown = 25 * 60; // 25 minutes
+    this.countdown = 5; // 25 minutes
     this.startCountdown(() => {
       this.sendNotification('Work session done! Time for a break 🎉');
       this.startBreak();
@@ -73,6 +73,12 @@ export class HomePage {
     this.sessionRunning = false;
     this.onBreak = false;
     this.displayCountdown = '';
+  }
+
+  resetPomodoro() {
+    this.sessionRunning = false;
+    this.onBreak = false;
+    this.displayCountdown = '25:00'; // Reset to default timer value
   }
 
   formatTime(seconds: number): string {

@@ -39,6 +39,10 @@
 .button-wrapper {
   width: 80%;
   margin-top: 20px;
+
+  ion-button {
+    margin-bottom: 10px; /* Add spacing between buttons */
+  }
 }
 
 ion-button {
