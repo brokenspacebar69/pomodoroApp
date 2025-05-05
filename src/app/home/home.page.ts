@@ -23,13 +23,19 @@ export class HomePage {
 
   constructor(private toastCtrl: ToastController, private platform: Platform) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.updateClock();
     setInterval(() => this.updateClock(), 1000);
 
     this.platform.backButton.subscribeWithPriority(10, () => {
       App.exitApp();
     });
+
+    // Request notification permissions
+    const permission = await LocalNotifications.requestPermissions();
+    if (permission.display !== 'granted') {
+      console.error('Notification permissions not granted');
+    }
   }
 
   updateClock() {
