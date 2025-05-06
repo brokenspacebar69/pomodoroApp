@@ -27,15 +27,15 @@ export class HomePage {
     this.updateClock();
     setInterval(() => this.updateClock(), 1000);
 
+    
+    const permission = await LocalNotifications.requestPermissions();
+    if (!permission.display) {
+      console.error('Notification permissions not granted');
+    }
+
     this.platform.backButton.subscribeWithPriority(10, () => {
       App.exitApp();
     });
-
-    // Request notification permissions
-    const permission = await LocalNotifications.requestPermissions();
-    if (permission.display !== 'granted') {
-      console.error('Notification permissions not granted');
-    }
   }
 
   updateClock() {
@@ -55,7 +55,7 @@ export class HomePage {
 
   startBreak() {
     this.onBreak = true;
-    this.countdown = 5 * 60; // 5 minutes
+    this.countdown = 5; // 5 minutes
     this.startCountdown(() => {
       this.sendNotification('Break finished! Ready for another Pomodoro 🍅');
       this.resetCycle();
@@ -82,9 +82,17 @@ export class HomePage {
   }
 
   resetPomodoro() {
+    
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+
+    
     this.sessionRunning = false;
     this.onBreak = false;
-    this.displayCountdown = '25:00'; // Reset to default timer value
+    this.countdown = 25 * 60; 
+    this.displayCountdown = '25:00'; 
   }
 
   formatTime(seconds: number): string {
@@ -94,20 +102,28 @@ export class HomePage {
   }
 
   async sendNotification(message: string) {
-    await LocalNotifications.requestPermissions(); // ask permission
+    const permission = await LocalNotifications.requestPermissions();
+    if (!permission.display) {
+      console.error('Notification permissions not granted');
+      return;
+    }
+
+   
     await LocalNotifications.schedule({
       notifications: [
         {
           title: 'Pomodoro Timer',
           body: message,
           id: new Date().getTime(),
-          schedule: { at: new Date(Date.now()) },
-          sound: 'beep.wav', // optional: customize with your own sound
-          smallIcon: 'ic_launcher',
+          schedule: { at: new Date(Date.now() + 1000) },
+          sound: 'alarm.mp3', 
+          smallIcon: 'ic_launcher', 
+          actionTypeId: '',
         }
       ]
     });
 
+    
     const toast = await this.toastCtrl.create({
       message: message,
       duration: 2000,
