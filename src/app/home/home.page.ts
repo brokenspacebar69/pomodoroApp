@@ -33,6 +33,16 @@ export class HomePage {
       console.error('Notification permissions not granted');
     }
 
+    await LocalNotifications.createChannel({
+      id: 'pomodoro-alerts',
+      name: 'Pomodoro Alerts',
+      description: 'Channel for Pomodoro alerts',
+      sound: 'alarm',
+      importance: 5,      
+      vibration: true,
+      visibility: 1
+    });
+
     this.platform.backButton.subscribeWithPriority(10, () => {
       App.exitApp();
     });
@@ -113,15 +123,16 @@ export class HomePage {
       notifications: [
         {
           title: 'Pomodoro Timer',
-          body: message,
-          id: new Date().getTime(),
-          schedule: { at: new Date(Date.now() + 1000) },
-          sound: 'alarm.mp3', 
-          smallIcon: 'ic_launcher', 
-          actionTypeId: '',
+          body: 'Work session done!',
+          id: Date.now(),
+          schedule: { at: new Date(Date.now() + 1000) }, 
+          sound: 'alarm',
+          channelId: 'pomodoro-alerts', // use the custom channel you created
+          smallIcon: 'ic_launcher'
         }
       ]
     });
+    
 
     
     const toast = await this.toastCtrl.create({
