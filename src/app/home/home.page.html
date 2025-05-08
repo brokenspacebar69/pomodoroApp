@@ -1,39 +1,27 @@
-<ion-content class="ion-padding" [fullscreen]="true">
+<ion-content class="ion-padding">
   <div class="container">
     <h1 class="title">Pomodoro Timer</h1>
 
-    <div class="timer-circle">
-      <h1 class="timer">{{ sessionRunning ? displayCountdown : '25:00' }}</h1>
+    <!-- Real-Time Clock -->
+    <div class="real-time-clock">
+      <h2>Current Time: {{ currentTime }}</h2>
     </div>
 
+    <!-- Countdown Timer -->
+    <div class="timer-circle">
+      <h1 class="timer">{{ displayCountdown || '25:00' }}</h1>
+    </div>
     <h3 class="session-text">
       {{ sessionRunning ? (onBreak ? 'Break Time ☕' : 'Focus Time 💻') : 'Ready to Start!' }}
     </h3>
 
     <div class="button-wrapper">
-      <ion-button 
-        expand="block" 
-        size="large" 
-        shape="round"
-        (click)="startPomodoro()"
-        [disabled]="sessionRunning"
-      >
+      <ion-button expand="block" size="large" shape="round" (click)="startPomodoro()" [disabled]="sessionRunning">
         Start Pomodoro Cycle
       </ion-button>
-
-      <ion-button 
-        expand="block" 
-        size="large" 
-        shape="round"
-        color="medium"
-        (click)="resetPomodoro()"
-      >
-        Reset Timer
+      <ion-button expand="block" size="large" shape="round" color="danger" (click)="resetPomodoro()">
+        Reset
       </ion-button>
-    </div>
-
-    <div class="clock">
-      <h2>{{ currentTime }}</h2>
     </div>
   </div>
 </ion-content>
