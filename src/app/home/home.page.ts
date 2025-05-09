@@ -45,7 +45,7 @@ export class HomePage {
 
     this.sessionRunning = true;
     this.onBreak = false;
-    this.countdown = 5; // 25 minutes in seconds
+    this.countdown = 5; 
     this.displayCountdown = this.formatTime(this.countdown);
 
     this.startCountdown();
@@ -59,21 +59,25 @@ export class HomePage {
       if (this.countdown <= 0) {
         clearInterval(this.interval);
 
-        this.triggerAlarm(
-          this.onBreak
-            ? 'Break finished! Ready for another Pomodoro 🍅'
-            : 'Work session done! Time for a break 🎉'
-        );
+        this.triggerAlarm('Work session done! Time for a break 🎉');
       }
     }, 1000);
   }
 
   startBreak() {
     this.onBreak = true; 
-    this.countdown = 5; 
+    this.countdown = 30; 
     this.displayCountdown = this.formatTime(this.countdown);
 
-    this.startCountdown(); 
+    this.interval = setInterval(() => {
+      this.countdown--;
+      this.displayCountdown = this.formatTime(this.countdown);
+
+      if (this.countdown <= 0) {
+        clearInterval(this.interval);
+        this.triggerAlarm('Break finished! Ready for another Pomodoro 🍅');
+      }
+    }, 1000);
   }
 
   resetCycle() {
@@ -126,9 +130,15 @@ export class HomePage {
     const alert = await this.alertCtrl.create({
       header: 'Pomodoro Timer',
       message: message,
-      buttons: ['OK']
+      buttons: [] 
     });
+
     await alert.present();
+
+   
+    setTimeout(() => {
+      alert.dismiss();
+    }, 5000); 
   }
 
   vibratePhone() {
@@ -144,9 +154,19 @@ export class HomePage {
     }
 
     this.audio = new Audio('assets/sound/alarm.wav');
+    this.audio.loop = true; 
     this.audio.load();
     this.audio.play().catch((error) => {
       console.error('Error playing alarm sound:', error);
     });
+
+    
+    setTimeout(() => {
+      if (this.audio) {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.audio.loop = false; 
+      }
+    }, 7000); 
   }
 }
