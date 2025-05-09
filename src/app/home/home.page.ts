@@ -45,7 +45,7 @@ export class HomePage {
 
     this.sessionRunning = true;
     this.onBreak = false;
-    this.countdown = 25 * 60; // 25 minutes in seconds
+    this.countdown = 5; // 25 minutes in seconds
     this.displayCountdown = this.formatTime(this.countdown);
 
     this.startCountdown();
@@ -59,30 +59,27 @@ export class HomePage {
       if (this.countdown <= 0) {
         clearInterval(this.interval);
 
-        if (this.onBreak) {
-          // Break session finished
-          this.playAlarmSound(3000); // Play alarm for 3 seconds
-          this.triggerAlarm('Break finished! Ready for another Pomodoro 🍅');
-        } else {
-          // Work session finished, transition to break
-          this.triggerAlarm('Work session done! Time for a break 🎉');
-        }
+        this.triggerAlarm(
+          this.onBreak
+            ? 'Break finished! Ready for another Pomodoro 🍅'
+            : 'Work session done! Time for a break 🎉'
+        );
       }
     }, 1000);
   }
 
   startBreak() {
-    this.onBreak = true; // Indicate that it's break time
-    this.countdown = 5 * 60; // 5 minutes in seconds
+    this.onBreak = true; 
+    this.countdown = 5; 
     this.displayCountdown = this.formatTime(this.countdown);
 
-    this.startCountdown(); // Start the countdown for the break
+    this.startCountdown(); 
   }
 
   resetCycle() {
     if (this.audio) {
       this.audio.pause();
-      this.audio.currentTime = 0; // Reset the audio playback position
+      this.audio.currentTime = 0; 
     }
 
     this.sessionRunning = false;
@@ -92,19 +89,19 @@ export class HomePage {
 
   resetPomodoro() {
     if (this.interval) {
-      clearInterval(this.interval); // Stop the countdown timer
+      clearInterval(this.interval); 
       this.interval = null;
     }
 
     if (this.audio) {
-      this.audio.pause(); // Stop the alarm sound
-      this.audio.currentTime = 0; // Reset the audio playback position
+      this.audio.pause(); 
+      this.audio.currentTime = 0; 
     }
 
-    this.sessionRunning = false; // Reset session state
-    this.onBreak = false; // Reset break state
-    this.countdown = 25 * 60; // Reset the countdown to 25 minutes
-    this.displayCountdown = this.formatTime(this.countdown); // Update the display
+    this.sessionRunning = false; 
+    this.onBreak = false; 
+    this.countdown = 25 * 60; 
+    this.displayCountdown = this.formatTime(this.countdown); 
   }
 
   formatTime(seconds: number): string {
@@ -118,16 +115,10 @@ export class HomePage {
     this.playAlarmSound();
     await this.showAlertNotification(message);
 
-    // Stop the alarm sound after pressing "OK"
-    if (this.audio) {
-      this.audio.pause();
-      this.audio.currentTime = 0;
-    }
-
     if (this.onBreak) {
-      this.resetCycle(); // Reset after break
+      this.resetCycle(); 
     } else {
-      this.startBreak(); // Start break after work session
+      this.startBreak(); 
     }
   }
 
@@ -146,7 +137,7 @@ export class HomePage {
     }
   }
 
-  playAlarmSound(duration: number = 0) {
+  playAlarmSound() {
     if (this.audio) {
       this.audio.pause();
       this.audio.currentTime = 0;
@@ -157,14 +148,5 @@ export class HomePage {
     this.audio.play().catch((error) => {
       console.error('Error playing alarm sound:', error);
     });
-
-    if (duration > 0) {
-      setTimeout(() => {
-        if (this.audio) {
-          this.audio.pause();
-          this.audio.currentTime = 0;
-        }
-      }, duration);
-    }
   }
 }
